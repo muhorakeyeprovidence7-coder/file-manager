@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jackson File Manager</title>
+
+<meta name="theme-color" content="#0f9d58">
+<link rel="manifest" href="manifest.json">
+
+<style>
+  body {
+    margin: 0; padding: 0;
+    font-family: sans-serif;
+    background: #f5f5f5;
+    color: #333;
+  }
+  header {
+    padding: 10px;
+    background: #0f9d58;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  header h1 {
+    margin: 0;
+    font-size: 1.2em;
+  }
+  #filePicker {
+    margin-left: 10px;
+  }
+  main {
+    padding: 10px;
+  }
+  h2 {
+    margin-top: 20px;
+    margin-bottom: 5px;
+    color: #0f9d58;
+  }
+  .fileContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .fileCard {
+    background: white;
+    padding: 10px;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    width: 150px;
+    text-align: center;
+  }
+  .preview {
+    max-width: 100%;
+    margin-top: 5px;
+    border-radius: 4px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Jackson File Manager</h1>
+  <input type="file" id="filePicker" multiple>
+</header>
+
+<main>
+  <div id="imagesSection">
+    <h2>Images</h2>
+    <div class="fileContainer" id="imagesContainer"></div>
+  </div>
+  <div id="videosSection">
+    <h2>Videos</h2>
+    <div class="fileContainer" id="videosContainer"></div>
+  </div>
+  <div id="audiosSection">
+    <h2>Audios</h2>
+    <div class="fileContainer" id="audiosContainer"></div>
+  </div>
+  <div id="documentsSection">
+    <h2>Documents</h2>
+    <div class="fileContainer" id="documentsContainer"></div>
+  </div>
+</main>
+
+<script>
+// Register service worker for offline caching
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js');
+}
+
+// File Picker & Categorization
+const picker = document.getElementById("filePicker");
+const imagesContainer = document.getElementById("imagesContainer");
+const videosContainer = document.getElementById("videosContainer");
+const audiosContainer = document.getElementById("audiosContainer");
+const documentsContainer = document.getElementById("documentsContainer");
+
+picker.addEventListener("change", () => {
+  // Clear previous content
+  imagesContainer.innerHTML = "";
+  videosContainer.innerHTML = "";
+  audiosContainer.innerHTML = "";
+  documentsContainer.innerHTML = "";
+
+  [...picker.files].forEach(file => {
+    const type = file.type;
+    const card = document.createElement("div");
+    card.className = "fileCard";
+
+    const name = document.createElement("p");
+    name.textContent = file.name;
+    card.appendChild(name);
+
+    if(type.startsWith("image/")) {
+      const img = document.createElement("img");
+      img.src = URL.createObjectURL(file);
+      img.className = "preview";
+      card.appendChild(img);
+      imagesContainer.appendChild(card);
+    }
+    else if(type.startsWith("video/")) {
+      const video = document.createElement("video");
+      video.src = URL.createObjectURL(file);
+      video.controls = true;
+      video.className = "preview";
+      card.appendChild(video);
+      videosContainer.appendChild(card);
+    }
+    else if(type.startsWith("audio/")) {
+      const audio = document.createElement("audio");
+      audio.src = URL.createObjectURL(file);
+      audio.controls = true;
+      card.appendChild(audio);
+      audiosContainer.appendChild(card);
+    }
+    else {
+      const doc = document.createElement("p");
+      doc.textContent = "📄 Document";
+      card.appendChild(doc);
+      documentsContainer.appendChild(card);
+    }
+  });
+});
+</script>
+
+</body>
+</html>
